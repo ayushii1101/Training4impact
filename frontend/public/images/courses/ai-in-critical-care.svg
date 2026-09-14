@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Artificial Intelligence in Critical Care certificate illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="0.55" stop-color="#1E3A8A"/>
+      <stop offset="1" stop-color="#0D9488"/>
+    </linearGradient>
+    <linearGradient id="chip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <circle cx="120" cy="70" r="120" fill="#FFFFFF" opacity="0.04"/>
+  <circle cx="690" cy="390" r="140" fill="#FFFFFF" opacity="0.04"/>
+  <g transform="translate(400 205)">
+    <rect x="-70" y="-44" width="140" height="88" rx="14" fill="#FFFFFF" opacity="0.06" stroke="#22D3EE" stroke-width="3"/>
+    <circle cx="-28" cy="0" r="22" fill="none" stroke="#22D3EE" stroke-width="6"/>
+    <circle cx="28" cy="0" r="22" fill="none" stroke="#2563EB" stroke-width="6"/>
+    <path d="M-6 0 H 6" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+    <path d="M0 -34 C -40 -96 40 -96 0 -34" stroke="#FFFFFF" stroke-width="6" fill="none" opacity="0.55"/>
+    <path d="M64 34 L 106 10 M96 62 L 138 38" stroke="#22D3EE" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+    <text x="0" y="-76" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="15" fill="#FFFFFF" opacity="0.7">AI</text>
+  </g>
+  <text x="400" y="385" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="700" fill="#FFFFFF">Artificial Intelligence in Critical Care</text>
+  <text x="400" y="412" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" fill="#93C5FD">Certificate Course · Open to All</text>
+</svg>
