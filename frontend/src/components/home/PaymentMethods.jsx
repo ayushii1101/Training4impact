@@ -13,27 +13,27 @@ export default function PaymentMethods({ id = 'payments' }) {
       <div className="container-site">
         <SectionHeading
           label="Secure Payments"
-          title={siteContent.paymentMethodsHeading || 'Pay Securely with Razorpay & UPI'}
+          title={siteContent.paymentMethodsHeading || 'Pay Securely with Razorpay'}
           subtitle={
             siteContent.paymentMethodsSubtitle ||
-            'Every payment is encrypted and processed on Razorpay. UPI and card payments accepted.'
+            'Every payment is encrypted and processed on Razorpay Checkout. Cards, UPI, net banking and more are supported by Razorpay.'
           }
         />
 
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 flex flex-col items-center gap-6">
           {siteContent.paymentMethods.map((method) => {
             const Icon = ICON_MAP[method.icon] || Smartphone;
             return (
               <div
                 key={method.id}
-                className="card flex flex-col p-6 transition-shadow hover:shadow-cardHover sm:p-8"
+                className="card flex w-full max-w-md flex-col p-6 transition-shadow hover:shadow-cardHover sm:p-8"
               >
                 <div className="flex items-center justify-between">
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600/10 text-primary-700">
                     <Icon aria-hidden="true" className="h-6 w-6" />
                   </span>
                   <span
-                    className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
+                    className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
                       method.id === 'upi'
                         ? 'bg-teal-600/10 text-teal-700'
                         : 'bg-cyan-500/10 text-cyan-700'

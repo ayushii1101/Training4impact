@@ -30,39 +30,43 @@ export default function CartPage() {
       return;
     }
 
-    if (items.length > 1) {
-      setCheckoutError(
-        'Multiple course checkout is not available yet. Please complete one course at a time, or contact us on WhatsApp +91 96444 88892.'
-      );
-      return;
-    }
-
-    const course = getCourseBySlug(items[0].slug);
-    if (!course) {
-      setCheckoutError('Course information could not be found. Please try again.');
-      return;
+    const cartCourses = [];
+    for (const item of items) {
+      const course = getCourseBySlug(item.slug);
+      if (!course) {
+        setCheckoutError('Some course information could not be found. Please try again.');
+        return;
+      }
+      cartCourses.push({ courseId: course.id, quantity: 1 });
     }
 
     setCheckingOut(true);
     try {
-      const { order } = await createOrder(course.id);
+      const { order } = await createOrder(cartCourses);
+      const primaryCourse = getCourseBySlug(items[0].slug);
+      const description =
+        items.length === 1 ? items[0].title : `${items[0].title} + ${items.length - 1} more`;
+
       const result = await startRazorpayCheckout({
         order,
-        courseId: course.id,
-        courseName: course.title,
+        courseId: primaryCourse.id,
+        courseName: description,
       });
 
-      removeItem(course.slug);
+      const purchased = items.map((item) => {
+        const course = getCourseBySlug(item.slug);
+        return { courseId: course.id, courseName: item.title, amount: item.fee };
+      });
+      items.forEach((item) => removeItem(item.slug));
 
       navigate('/payment-success', {
         state: {
-          courseName: course.title,
-          courseSlug: course.slug,
-          coursePrice: course.fee,
+          courses: purchased,
           orderRef: order.id,
           paymentId: result.payment?.paymentId,
-          amount: course.fee,
+          amount: order.amount / 100,
           enrollmentStatus: result.enrollment?.status ?? null,
+          enrollments: result.enrollments ?? null,
         },
       });
     } catch (err) {

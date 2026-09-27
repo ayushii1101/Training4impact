@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, MapPin, Phone, Facebook, Instagram, Linkedin, ShieldCheck } from 'lucide-react';
 import { siteContent } from '../../data/siteContent';
-import { useGoToSection } from '../../utils/hooks';
 
 const FooterLink = ({ to, children }) => (
   <Link to={to} className="text-sm text-slate-400 transition-colors hover:text-cyan-400">
@@ -10,7 +9,6 @@ const FooterLink = ({ to, children }) => (
 );
 
 export default function Footer() {
-  const goToSection = useGoToSection();
 
   return (
     <footer className="bg-navy-900 text-slate-300">
@@ -22,7 +20,7 @@ export default function Footer() {
             <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
               Future Impact Pvt Ltd
             </p>
-            <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="mt-4 text-xs font-bold uppercase tracking-wider text-slate-400">
               FUTURE IMPACT PRIVATE LIMITED
             </p>
             <p className="mt-2 flex items-start gap-2 text-sm text-slate-400">
@@ -52,14 +50,7 @@ export default function Footer() {
               <li><FooterLink to="/courses">Fellowships</FooterLink></li>
               <li><FooterLink to="/courses?category=crs">Certificate Courses</FooterLink></li>
               <li><FooterLink to="/agile">Agile Training (SAFe®)</FooterLink></li>
-              <li>
-                <button
-                  onClick={() => goToSection('testimonials')}
-                  className="text-sm text-slate-400 transition-colors hover:text-cyan-400"
-                >
-                  Testimonials
-                </button>
-              </li>
+              <li><FooterLink to="/testimonials">Testimonials</FooterLink></li>
             </ul>
           </div>
 
@@ -69,6 +60,7 @@ export default function Footer() {
             <ul className="space-y-2.5">
               <li><FooterLink to="/contact">About Us</FooterLink></li>
               <li><FooterLink to="/contact">Contact</FooterLink></li>
+              <li><FooterLink to="/services">Our Services</FooterLink></li>
               <li className="pt-2">
                 <div className="flex gap-3">
                   <a

@@ -8,6 +8,8 @@ import PaymentSuccessPage from '../pages/PaymentSuccessPage';
 import AgilePage from '../pages/AgilePage';
 import ContactPage from '../pages/ContactPage';
 import OurNetworkPage from '../pages/OurNetworkPage';
+import TestimonialsPage from '../pages/TestimonialsPage';
+import ServicesPage from '../pages/ServicesPage';
 import TermsPage from '../pages/TermsPage';
 import PrivacyPage from '../pages/PrivacyPage';
 import RefundPolicyPage from '../pages/RefundPolicyPage';
@@ -26,6 +28,8 @@ export default function AppRoutes() {
         <Route path="/agile" element={<AgilePage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/our-network" element={<OurNetworkPage />} />
+        <Route path="/testimonials" element={<TestimonialsPage />} />
+        <Route path="/services" element={<ServicesPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/refund-policy" element={<RefundPolicyPage />} />

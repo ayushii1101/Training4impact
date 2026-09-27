@@ -58,7 +58,16 @@ export default function PaymentSuccessPage() {
     );
   }
 
-  const isVerified = data.enrollmentStatus === 'active';
+  const courses =
+    Array.isArray(data.courses) && data.courses.length > 0
+      ? data.courses
+      : [{ courseName: data.courseName, amount: data.coursePrice }];
+  const multi = courses.length > 1;
+  const isVerified =
+    data.enrollmentStatus === 'active' ||
+    (Array.isArray(data.enrollments) &&
+      data.enrollments.length > 0 &&
+      data.enrollments.every((enr) => enr.status === 'active'));
 
   return (
     <div className="bg-surface-50 flex min-h-[70vh] items-center justify-center px-4">
@@ -73,16 +82,38 @@ export default function PaymentSuccessPage() {
           </h1>
           <p className="mt-2 text-sm text-slate-600">
             {isVerified
-              ? `Your enrollment for "${data.courseName}" has been confirmed.`
-              : `Your payment for "${data.courseName}" was received and is being processed.`}
+              ? multi
+                ? `Your enrollment for ${courses.length} programs has been confirmed.`
+                : `Your enrollment for "${courses[0]?.courseName}" has been confirmed.`
+              : multi
+                ? `Your payment for ${courses.length} programs was received and is being processed.`
+                : `Your payment for "${courses[0]?.courseName}" was received and is being processed.`}
           </p>
         </div>
 
         <div className="mt-6 space-y-3 rounded-xl bg-surface-50 px-5 py-4 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500">Course</span>
-            <span className="font-semibold text-navy-900">{data.courseName}</span>
-          </div>
+          {multi ? (
+            <div className="border-b border-slate-100 pb-3">
+              <span className="block text-slate-500">Programs</span>
+              <ul className="mt-2 space-y-1.5">
+                {courses.map((course, index) => (
+                  <li key={`${course.courseId ?? 'course'}-${index}`} className="flex items-center justify-between gap-4">
+                    <span className="font-semibold text-navy-900">{course.courseName}</span>
+                    {course.amount != null && (
+                      <span className="shrink-0 text-slate-600">
+                        {'\u20B9'}{Number(course.amount).toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Program</span>
+              <span className="font-semibold text-navy-900">{courses[0]?.courseName}</span>
+            </div>
+          )}
           {data.orderRef && (
             <div className="flex items-center justify-between">
               <span className="text-slate-500">Order Reference</span>
@@ -106,7 +137,7 @@ export default function PaymentSuccessPage() {
           <div className="flex items-center justify-between">
             <span className="text-slate-500">Enrollment Status</span>
             <span className={`font-semibold ${isVerified ? 'text-emerald-600' : 'text-amber-600'}`}>
-              {isVerified ? 'Confirmed' : 'Processing'}
+              {isVerified ? (multi ? `${courses.length} Programs Confirmed` : 'Confirmed') : 'Processing'}
             </span>
           </div>
         </div>

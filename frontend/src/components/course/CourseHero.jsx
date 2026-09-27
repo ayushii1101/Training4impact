@@ -51,11 +51,11 @@ export default function CourseHero({ course }) {
         <div className="grid items-center gap-8 lg:grid-cols-2">
           <div>
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+              <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
                 <BadgeCheck aria-hidden="true" className="h-3.5 w-3.5" />
                 {course.badge}
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-slate-200">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                 <Filter aria-hidden="true" className="h-3.5 w-3.5" />
                 {CATEGORY_LABELS[course.category] || course.category}
               </span>

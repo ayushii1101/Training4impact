@@ -27,7 +27,7 @@ export default function CourseOverview({ course }) {
                 <ul className="mt-4 grid gap-3 sm:grid-cols-2">
                   {course.highlights.map((item) => (
                     <li key={item} className="flex items-start gap-2.5 rounded-xl bg-surface-50 p-4 text-sm text-navy-800 ring-1 ring-slate-100">
-                      <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-500 text-[11px] font-bold text-white">
+                      <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-500 text-xs font-bold text-white">
                         ✓
                       </span>
                       {item}

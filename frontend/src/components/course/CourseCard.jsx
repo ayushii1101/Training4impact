@@ -41,17 +41,17 @@ export default function CourseCard({ course }) {
           src={course.image}
           alt={`${course.title} — ${course.shortTitle} program`}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-navy-900/40 via-transparent to-transparent" />
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-primary-600 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-primary-600 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
           <BadgeCheck aria-hidden="true" className="h-3 w-3" />
           {course.badge}
         </span>
-        <span className="absolute bottom-3 left-3 inline-flex items-center rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-navy-800">
+        <span className="absolute bottom-3 left-3 inline-flex items-center rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-navy-800">
           {CATEGORY_LABELS[course.category] || course.category}
         </span>
       </Link>

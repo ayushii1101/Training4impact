@@ -393,7 +393,7 @@ export const courses = [
     category: 'crs',
     categories: ['crs', 'nrs'],
     targetAudience: 'Open to All',
-    image: '/images/courses/ai-in-critical-care.svg',
+    image: '/images/courses/ai-in-critical-care.jpg',
     badge: 'Certificate',
     description:
       'A focused certificate course for healthcare professionals exploring the real-world impact of Artificial Intelligence in Cardiac Critical Care. E-Certificate awarded by The Simulation Society.',

@@ -1,4 +1,21 @@
+import { useEffect, useState } from 'react';
 import { siteContent } from '../../data/siteContent';
+
+const GAP = 18;
+const FALLBACK = { right: 24, bottom: 108 };
+const BOTPRESS_SELECTORS = '[class*="bpFabWrapper"], [class*="bpw-floatingButton"]';
+
+function getBotpressFab() {
+  const els = document.querySelectorAll(BOTPRESS_SELECTORS);
+  for (const el of els) {
+    const style = window.getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    if (style.display !== 'none' && rect.width > 0 && rect.height > 0) {
+      return { el, rect };
+    }
+  }
+  return null;
+}
 
 function WhatsAppIcon() {
   return (
@@ -13,8 +30,55 @@ export default function FloatingWhatsApp() {
     siteContent.whatsappDefaultMessage
   )}`;
 
+  const [offset, setOffset] = useState(FALLBACK);
+
+  useEffect(() => {
+    let raf = 0;
+    let cancelled = false;
+
+    const update = () => {
+      if (cancelled) return;
+      const fab = getBotpressFab();
+      if (fab) {
+        const { rect } = fab;
+        const viewportWidth = document.documentElement.clientWidth;
+        const viewportHeight = document.documentElement.clientHeight;
+        setOffset((prev) => {
+          const next = {
+            right: Math.max(0, Math.round(viewportWidth - rect.right)),
+            bottom: Math.round(viewportHeight - rect.top + GAP),
+          };
+          return prev.right === next.right && prev.bottom === next.bottom ? prev : next;
+        });
+      }
+    };
+
+    const schedule = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        update();
+      });
+    };
+
+    const observer = new MutationObserver(schedule);
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('resize', schedule);
+    schedule();
+
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+      window.removeEventListener('resize', schedule);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
-    <div className="group fixed z-[130] flex flex-col items-end gap-2 right-4 bottom-24 sm:right-5 sm:bottom-[5.5rem]">
+    <div
+      className="group fixed z-[130] flex flex-col items-end gap-2"
+      style={{ right: offset.right, bottom: offset.bottom }}
+    >
       <span
         aria-hidden="true"
         className="pointer-events-none hidden whitespace-nowrap rounded-lg bg-navy-900 px-3 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 transition-opacity duration-150 group-hover:opacity-100 sm:block"

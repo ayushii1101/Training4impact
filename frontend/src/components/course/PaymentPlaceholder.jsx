@@ -38,7 +38,7 @@ export default function PaymentPlaceholder({ course }) {
 
     setPending(true);
     try {
-      const { order } = await createOrder(course.id);
+      const { order } = await createOrder([{ courseId: course.id, quantity: 1 }]);
       const result = await startRazorpayCheckout({
         order,
         courseId: course.id,
@@ -51,13 +51,12 @@ export default function PaymentPlaceholder({ course }) {
 
       navigate('/payment-success', {
         state: {
-          courseName: course.title,
-          courseSlug: course.slug,
-          coursePrice: course.fee,
+          courses: [{ courseId: course.id, courseName: course.title, amount: course.fee }],
           orderRef: order.id,
           paymentId: result.payment?.paymentId,
-          amount: course.fee,
+          amount: order.amount / 100,
           enrollmentStatus: result.enrollment?.status ?? null,
+          enrollments: result.enrollments ?? null,
         },
       });
     } catch (err) {

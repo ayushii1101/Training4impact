@@ -64,7 +64,7 @@ export default function LegalPageLayout({ title, subtitle, intro, sections, clos
                 ) : (
                   <>
                     {section.body && (
-                      <p className="mt-3 whitespace-pre-line leading-relaxed text-slate-700">
+                      <p className="mt-3 whitespace-pre-line text-base leading-relaxed text-slate-700">
                         {section.body}
                       </p>
                     )}
@@ -82,7 +82,7 @@ export default function LegalPageLayout({ title, subtitle, intro, sections, clos
                 )}
 
                 {section.footer && (
-                  <p className="mt-3 whitespace-pre-line leading-relaxed text-slate-700">
+                  <p className="mt-3 whitespace-pre-line text-base leading-relaxed text-slate-700">
                     {section.footer}
                   </p>
                 )}

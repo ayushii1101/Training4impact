@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Quote, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Quote, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 import { testimonials } from '../../data/testimonials';
 import SectionHeading from '../common/SectionHeading';
 
-export default function TestimonialsSection({ id = 'testimonials' }) {
+export default function TestimonialsSection({ id = 'testimonials', limit, showViewAll = false }) {
   const [open, setOpen] = useState(true);
+  const visible = limit ? testimonials.slice(0, limit) : testimonials;
 
   return (
     <section id={id} className="bg-surface-50 py-16 sm:py-24" aria-labelledby="testimonials-heading">
@@ -15,24 +17,26 @@ export default function TestimonialsSection({ id = 'testimonials' }) {
           subtitle="Hundreds of Indian medical professionals have advanced their careers with Training4impact.com."
         />
 
-        <div className="mt-10 flex justify-center">
-          <button
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-navy-800 transition-colors hover:border-primary-400 hover:text-primary-700"
-          >
-            {open ? (
-              <ChevronUp aria-hidden="true" className="h-4 w-4 text-primary-700" />
-            ) : (
-              <ChevronDown aria-hidden="true" className="h-4 w-4 text-primary-700" />
-            )}
-            {open ? 'Collapse Testimonials' : 'Show Testimonials'}
-          </button>
-        </div>
+        {!limit && (
+          <div className="mt-10 flex justify-center">
+            <button
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-navy-800 transition-colors hover:border-primary-400 hover:text-primary-700"
+            >
+              {open ? (
+                <ChevronUp aria-hidden="true" className="h-4 w-4 text-primary-700" />
+              ) : (
+                <ChevronDown aria-hidden="true" className="h-4 w-4 text-primary-700" />
+              )}
+              {open ? 'Collapse Testimonials' : 'Show Testimonials'}
+            </button>
+          </div>
+        )}
 
-        {open && (
+        {(!limit || open) && (
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {testimonials.map((t) => (
+            {visible.map((t) => (
               <figure
                 key={t.id}
                 className="card flex flex-col p-6 transition-shadow hover:shadow-cardHover"
@@ -55,6 +59,18 @@ export default function TestimonialsSection({ id = 'testimonials' }) {
                 </figcaption>
               </figure>
             ))}
+          </div>
+        )}
+
+        {showViewAll && (
+          <div className="mt-10 text-center">
+            <Link
+              to="/testimonials"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-navy-800 transition-colors hover:border-primary-400 hover:text-primary-700"
+            >
+              View All Testimonials
+              <ArrowRight aria-hidden="true" className="h-4 w-4 text-primary-700" />
+            </Link>
           </div>
         )}
       </div>

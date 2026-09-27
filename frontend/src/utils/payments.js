@@ -18,11 +18,11 @@ async function parseResponse(res) {
   return data;
 }
 
-export async function createOrder(courseId) {
+export async function createOrder(courses) {
   const res = await fetch(`${API_URL}/api/payments/create-order`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ courseId }),
+    body: JSON.stringify({ courses }),
   });
   return parseResponse(res);
 }

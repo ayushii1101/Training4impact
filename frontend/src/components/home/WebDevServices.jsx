@@ -46,7 +46,7 @@ export default function WebDevServices({ id = 'webdev' }) {
                     <Icon aria-hidden="true" className="h-5 w-5" />
                   </span>
                   {feature.badge && (
-                    <span className="rounded-full bg-teal-600/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-teal-700">
+                    <span className="rounded-full bg-teal-600/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-teal-700">
                       {feature.badge}
                     </span>
                   )}
@@ -68,7 +68,7 @@ export default function WebDevServices({ id = 'webdev' }) {
               }`}
             >
               {plan.popular && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary-600 px-4 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary-600 px-4 py-1 text-xs font-bold uppercase tracking-wide text-white">
                   ⭐ Most Popular
                 </span>
               )}

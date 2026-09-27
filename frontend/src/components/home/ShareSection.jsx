@@ -15,7 +15,9 @@ const sharedText =
   "Hi! I'd like to share an amazing platform for medical professionals \uD83C\uDFE5\n\n*Training4impact.com* offers One-Year Fellowships in:\n\u2705 Cardiac Critical Care\n\u2705 Echocardiography\n\u2705 ECMO\n\u2705 Cardio Diabetes\n\u2705 Certificate Courses open to all\n\nSupported by The Simulation Society & ISCU \u{D83C}\u{DFC6}\n\n\uD83D\uDD17 Visit: https://training4impact.com\n\uD83D\uDCDE WhatsApp: +91 96444 88892";
 
 const groupsText =
-  "\uD83C\uDF1F *Fellowship Opportunity for Medical Professionals* \uD83C\uDF1F\n\nAttention Doctors, Nurses & Perfusionists!\n\nTraining4impact.com is now accepting enrollments for 2025-26 batches:\n\n\u2705 One Year Fellowship in Cardiac Critical Care — \u20B959,000\n\u2705 One Year Fellowship in Echocardiography — \u20B959,000\n\u2705 One Year Fellowship in ECMO — \u20B959,000\n\u2705 Certificate Course in ECHO — \u20B95,900\n\nInternationally recognised | Online+Hands-On\n\n\uD83D\uDD17 https://training4impact.com\n\uD83D\uDCDE +91 96444 88892";
+  "\uD83C\uDF1F *Fellowship Opportunity for Medical Professionals* \uD83C\uDF1F\n\nAttention Doctors, Nurses & Perfusionists!\n\nTraining4impact.com \u2014 " +
+  siteContent.announcement +
+  " Enroll today:\n\n\u2705 One Year Fellowship in Cardiac Critical Care — \u20B959,000\n\u2705 One Year Fellowship in Echocardiography — \u20B959,000\n\u2705 One Year Fellowship in ECMO — \u20B959,000\n\u2705 Certificate Course in ECHO — \u20B95,900\n\nInternationally recognised | Online+Hands-On\n\n\uD83D\uDD17 https://training4impact.com\n\uD83D\uDCDE +91 96444 88892";
 
 const EMAIL_SUBJECT = encodeURIComponent('Training4impact.com — Fellowships for Medical Professionals');
 const EMAIL_BODY = encodeURIComponent(siteContent.shareSection.copyMessage);
@@ -26,6 +28,16 @@ export default function ShareSection({ id = 'share' }) {
   const copyMessage = async () => {
     try {
       await navigator.clipboard.writeText(siteContent.shareSection.copyMessage);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const copyWebsiteLink = async () => {
+    try {
+      await navigator.clipboard.writeText('https://training4impact.com');
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
@@ -84,15 +96,7 @@ export default function ShareSection({ id = 'share' }) {
           </button>
 
           <button
-            onClick={() => {
-              try {
-                navigator.clipboard.writeText('https://training4impact.com');
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2500);
-              } catch {
-                setCopied(false);
-              }
-            }}
+            onClick={copyWebsiteLink}
             className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-surface-50 p-5 text-left transition-colors hover:border-primary-400"
           >
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white">

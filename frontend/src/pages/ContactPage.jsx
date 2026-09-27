@@ -16,7 +16,7 @@ export default function ContactPage() {
         <div className="container-site">
           <p className="section-label mb-2">Contact Us</p>
           <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl">We're Here to Help</h1>
-          <p className="mt-3 max-w-2xl text-slate-600">
+          <p className="mt-3 max-w-2xl text-base text-slate-600">
             Have a question about fellowships, payments, or anything else? We reply within 24 hours
             on WhatsApp.
           </p>

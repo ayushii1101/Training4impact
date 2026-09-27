@@ -167,7 +167,7 @@ export default function AgilePage() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="section-label mb-3">Two Distinct Ways We Work</p>
             <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">Two Distinct Ways We Work</h2>
-            <p className="mt-4 text-slate-600 sm:text-lg">
+            <p className="mt-4 text-base text-slate-600 sm:text-lg">
               We clearly distinguish official SAFe® certification courses from independent
               Agile consulting and workshops.
             </p>
@@ -203,7 +203,7 @@ export default function AgilePage() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="section-label mb-3">Public SAFe® Training</p>
             <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">Public SAFe® Training</h2>
-            <p className="mt-4 text-slate-600 sm:text-lg">
+            <p className="mt-4 text-base text-slate-600 sm:text-lg">
               Open-enrollment, instructor-led courses for professionals from different organizations.
               Course availability is subject to applicable trainer eligibility and Scaled Agile
               requirements.
@@ -245,7 +245,7 @@ export default function AgilePage() {
             <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">
               Private SAFe® Training for Organizations
             </h2>
-            <p className="mt-4 text-slate-300">
+            <p className="mt-4 text-base text-slate-300">
               Give your teams a dedicated learning experience designed for one enterprise.
             </p>
             <ul className="mt-6 space-y-3">
@@ -290,7 +290,7 @@ export default function AgilePage() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="section-label mb-3">How SAFe® Training Works</p>
             <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">How SAFe® Training Works</h2>
-            <p className="mt-4 text-slate-600 sm:text-lg">
+            <p className="mt-4 text-base text-slate-600 sm:text-lg">
               A transparent process designed around the applicable Scaled Agile requirements.
             </p>
           </div>
@@ -316,7 +316,7 @@ export default function AgilePage() {
             <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">
               Agile Consulting &amp; Independent Workshops
             </h2>
-            <p className="mt-4 text-slate-600 sm:text-lg">
+            <p className="mt-4 text-base text-slate-600 sm:text-lg">
               Beyond certification training, Training4impact provides independent Agile,
               transformation and AI-enabled learning services.
             </p>
@@ -397,7 +397,7 @@ export default function AgilePage() {
           <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">
             Ready to Build Agile Capability?
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-slate-300">
+          <p className="mx-auto mt-4 max-w-2xl text-base text-slate-300">
             Join an upcoming public SAFe® course, discuss private corporate training, or explore
             independent Agile and AI transformation services.
           </p>

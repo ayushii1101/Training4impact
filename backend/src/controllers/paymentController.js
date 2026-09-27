@@ -1,17 +1,24 @@
-import Razorpay from 'razorpay';
 import { randomUUID, createHmac, timingSafeEqual } from 'crypto';
 import razorpay from '../config/razorpay.js';
 import { getCourseById } from '../config/courses.js';
 import {
-  insertOrder,
+  insertOrderWithItems,
   getOrderByRazorpayId,
+  getOrderItems,
+  getPaymentByRazorpayOrderId,
   persistCapturedPayment,
   recordFailedPayment,
   updateOrderStatus,
 } from '../config/database.js';
 
-const CREATE_ORDER_KEYS = ['courseId'];
+const CREATE_ORDER_KEYS = ['courses'];
+const CART_ITEM_KEYS = ['courseId', 'quantity'];
 const VERIFY_KEYS = ['courseId', 'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature'];
+
+const MAX_QUANTITY_PER_ITEM = 100;
+// Razorpay Test/Live per-transaction limit is ₹5,00,000; enforce it server-side
+// so oversized carts are rejected with a clean 400 before reaching Razorpay.
+const MAX_ORDER_PAISE = 50000000;
 
 const toPaise = (rupees) => Math.round(rupees) * 100;
 
@@ -27,6 +34,20 @@ const verifyRazorpaySignature = ({ orderId, paymentId, signature, secret }) => {
   return a.length === b.length && timingSafeEqual(a, b);
 };
 
+// Webhook signature verification. Razorpay's SDK compares the bare hex digest,
+// but webhook deliveries can carry either `sha256=<hex>` or the bare `<hex>`
+// form depending on how the dashboard/event is configured. Accept both, using a
+// constant-time comparison so the check does not leak timing information.
+const verifyWebhookSignature = (payloadString, signature, secret) => {
+  const digest = createHmac('sha256', secret).update(payloadString, 'utf8').digest('hex');
+  const variants = [`sha256=${digest}`, digest];
+  const provided = Buffer.from(String(signature), 'utf8');
+  return variants.some((variant) => {
+    const expected = Buffer.from(variant, 'utf8');
+    return expected.length === provided.length && timingSafeEqual(expected, provided);
+  });
+};
+
 export const createOrder = async (req, res) => {
   try {
     const body = req.body ?? {};
@@ -37,47 +58,99 @@ export const createOrder = async (req, res) => {
 
     const extraKeys = Object.keys(body).filter((key) => !CREATE_ORDER_KEYS.includes(key));
     if (extraKeys.length > 0) {
-      return safeJsonError(res, 400, `Only "courseId" is accepted. Unexpected field(s): ${extraKeys.join(', ')}`);
+      return safeJsonError(res, 400, `Only "courses" is accepted. Unexpected field(s): ${extraKeys.join(', ')}`);
     }
 
-    const { courseId } = body;
+    const { courses } = body;
 
-    if (courseId === undefined || courseId === null) {
-      return safeJsonError(res, 400, 'courseId is required');
+    if (!Array.isArray(courses) || courses.length === 0) {
+      return safeJsonError(res, 400, 'Cart is empty. Add at least one course.');
     }
 
-    if (typeof courseId !== 'string' || courseId.trim() === '') {
-      return safeJsonError(res, 400, 'courseId must be a non-empty string');
+    const aggregated = new Map();
+    for (const item of courses) {
+      if (!isPlainObject(item)) {
+        return safeJsonError(res, 400, 'Each cart item must be an object with courseId and quantity');
+      }
+
+      const itemExtraKeys = Object.keys(item).filter((key) => !CART_ITEM_KEYS.includes(key));
+      if (itemExtraKeys.length > 0) {
+        return safeJsonError(
+          res,
+          400,
+          `Only "courseId" and "quantity" are accepted per item. Unexpected field(s): ${itemExtraKeys.join(', ')}`
+        );
+      }
+
+      const { courseId, quantity } = item;
+
+      if (typeof courseId !== 'string' || courseId.trim() === '') {
+        return safeJsonError(res, 400, 'Each cart item must include a valid courseId');
+      }
+
+      if (quantity !== undefined && quantity !== null) {
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY_PER_ITEM) {
+          return safeJsonError(
+            res,
+            400,
+            `quantity must be a positive integer between 1 and ${MAX_QUANTITY_PER_ITEM}`
+          );
+        }
+      }
+
+      const qty = quantity === undefined || quantity === null ? 1 : quantity;
+      const trimmedCourseId = courseId.trim();
+      aggregated.set(trimmedCourseId, (aggregated.get(trimmedCourseId) ?? 0) + qty);
     }
 
-    const course = getCourseById(courseId);
-
-    if (!course) {
-      return safeJsonError(res, 404, 'Course not found');
+    const lines = [];
+    let totalPaise = 0;
+    for (const [courseId, quantity] of aggregated) {
+      const course = getCourseById(courseId);
+      if (!course) {
+        return safeJsonError(res, 404, `Course not found: ${courseId}`);
+      }
+      if (typeof course.amount !== 'number' || !Number.isInteger(course.amount) || course.amount <= 0) {
+        return safeJsonError(res, 500, 'Course price is not configured correctly');
+      }
+      const unitPricePaise = toPaise(course.amount);
+      const lineTotalPaise = unitPricePaise * quantity;
+      totalPaise += lineTotalPaise;
+      lines.push({
+        courseId,
+        courseName: course.name,
+        unitPricePaise,
+        quantity,
+        lineTotalPaise,
+      });
     }
 
-    if (typeof course.amount !== 'number' || !Number.isInteger(course.amount) || course.amount <= 0) {
-      return safeJsonError(res, 500, 'Course price is not configured correctly');
+    if (!Number.isSafeInteger(totalPaise) || totalPaise <= 0) {
+      return safeJsonError(res, 400, 'Cart total could not be calculated');
+    }
+    if (totalPaise > MAX_ORDER_PAISE) {
+      return safeJsonError(res, 400, 'Order total exceeds the maximum allowed amount');
     }
 
-    const amountInPaise = toPaise(course.amount);
     const receipt = `rcp_${randomUUID().replace(/-/g, '')}`;
 
     const razorpayOrder = await razorpay.orders.create({
-      amount: amountInPaise,
+      amount: totalPaise,
       currency: 'INR',
       receipt,
     });
 
+    const primary = lines[0];
     try {
-      insertOrder({
-        courseId,
-        courseName: course.name,
-        amountPaise: amountInPaise,
+      insertOrderWithItems({
+        courseId: primary.courseId,
+        courseName: primary.courseName,
+        amountPaise: totalPaise,
         currency: 'INR',
         razorpayOrderId: razorpayOrder.id,
         receipt,
         status: 'created',
+        items: lines,
       });
     } catch (error) {
       const isDuplicate = String(error?.message ?? '').includes('UNIQUE');
@@ -95,10 +168,22 @@ export const createOrder = async (req, res) => {
         currency: razorpayOrder.currency,
         receipt: razorpayOrder.receipt,
       },
+      cart: {
+        items: lines.map((line) => ({
+          courseId: line.courseId,
+          courseName: line.courseName,
+          unitPrice: line.unitPricePaise / 100,
+          quantity: line.quantity,
+          lineTotal: line.lineTotalPaise / 100,
+        })),
+        totalAmountPaise: totalPaise,
+        totalAmount: totalPaise / 100,
+        currency: 'INR',
+      },
       course: {
-        id: courseId,
-        name: course.name,
-        price: course.amount,
+        id: primary.courseId,
+        name: primary.courseName,
+        price: primary.unitPricePaise / 100,
       },
     });
   } catch (error) {
@@ -185,15 +270,28 @@ export const verifyPayment = async (req, res) => {
       return safeJsonError(res, 400, 'Payment does not belong to the referenced order');
     }
 
+    const orderItems = getOrderItems(order.razorpay_order_id);
+    const effectiveItems = orderItems.length
+      ? orderItems
+      : [
+          {
+            course_id: order.course_id,
+            course_name: order.course_name,
+            line_total_paise: order.amount_paise,
+            quantity: 1,
+          },
+        ];
+
     const paymentStatus = payment.status;
     const captured = paymentStatus === 'captured';
 
     if (captured) {
-      const { payment: paymentRecord, enrollment, alreadyExisting } = persistCapturedPayment({
+      const { payment: paymentRecord, enrollment, enrollments, alreadyExisting } = persistCapturedPayment({
         order,
         paymentId: razorpay_payment_id,
         amountPaise: Number(payment.amount) || order.amount_paise,
         paymentStatus,
+        items: effectiveItems,
       });
 
       return res.status(200).json({
@@ -208,12 +306,25 @@ export const verifyPayment = async (req, res) => {
           id: order.razorpay_order_id,
           amount: order.amount_paise,
           currency: order.currency,
+          items: effectiveItems.map((item) => ({
+            courseId: item.course_id,
+            courseName: item.course_name,
+            quantity: item.quantity ?? 1,
+            lineTotal: item.line_total_paise ?? item.amount_paise,
+          })),
         },
         course: {
           id: course.id,
           name: course.name,
           price: course.amount,
         },
+        enrollments: (enrollments ?? []).map((enr) => ({
+          courseId: enr.course_id,
+          courseName: enr.course_name,
+          status: enr.enrollment_status,
+          amountPaise: enr.amount_paise,
+          createdAt: enr.created_at,
+        })),
         enrollment: enrollment
           ? { status: enrollment.enrollment_status, createdAt: enrollment.created_at }
           : null,
@@ -239,12 +350,19 @@ export const verifyPayment = async (req, res) => {
         id: order.razorpay_order_id,
         amount: order.amount_paise,
         currency: order.currency,
+        items: effectiveItems.map((item) => ({
+          courseId: item.course_id,
+          courseName: item.course_name,
+          quantity: item.quantity ?? 1,
+          lineTotal: item.line_total_paise ?? item.amount_paise,
+        })),
       },
       course: {
         id: course.id,
         name: course.name,
         price: course.amount,
       },
+      enrollments: [],
       enrollment: null,
     });
   } catch (error) {
@@ -253,8 +371,12 @@ export const verifyPayment = async (req, res) => {
   }
 };
 
+const WEBHOOK_EVENTS = new Set(['payment.captured', 'payment.failed', 'order.paid']);
+
 export const handleWebhook = async (req, res) => {
   try {
+    // Express raw body middleware supplies a Buffer; signature verification MUST
+    // use the exact raw bytes sent by Razorpay, never re-serialized JSON.
     const rawBody = req.body;
     if (!Buffer.isBuffer(rawBody)) {
       return safeJsonError(res, 400, 'Raw request body required');
@@ -272,9 +394,10 @@ export const handleWebhook = async (req, res) => {
       return safeJsonError(res, 401, 'Missing webhook signature');
     }
 
+    // Signature verified against the raw body before the payload is trusted or parsed.
     const payloadString = rawBody.toString('utf8');
 
-    const valid = Razorpay.validateWebhookSignature(payloadString, signature, webhookSecret);
+    const valid = verifyWebhookSignature(payloadString, signature, webhookSecret);
     if (!valid) {
       return safeJsonError(res, 401, 'Invalid webhook signature');
     }
@@ -287,8 +410,14 @@ export const handleWebhook = async (req, res) => {
     }
 
     const eventName = event?.event;
-    if (!eventName) {
+    if (typeof eventName !== 'string') {
       return safeJsonError(res, 400, 'Missing event type');
+    }
+
+    // Explicit allowlist. Unknown/unsupported events are acknowledged without
+    // side effects so Razorpay stops retrying them and the API never errors.
+    if (!WEBHOOK_EVENTS.has(eventName)) {
+      return res.status(200).json({ received: true, ignored: true });
     }
 
     if (eventName === 'payment.failed') {
@@ -299,6 +428,16 @@ export const handleWebhook = async (req, res) => {
       const order = getOrderByRazorpayId(entity.order_id);
       if (!order) {
         console.warn('Webhook payment.failed for unknown order:', entity.order_id);
+        return res.status(200).json({ received: true, ignored: true });
+      }
+      // Never regress an order that already has a captured payment (retry, or a
+      // delayed failed callback arriving after a successful payment was recorded).
+      const existingPayment = getPaymentByRazorpayOrderId(entity.order_id);
+      const alreadyCaptured =
+        existingPayment &&
+        existingPayment.verification_status === 'verified' &&
+        existingPayment.payment_status === 'captured';
+      if (alreadyCaptured) {
         return res.status(200).json({ received: true, ignored: true });
       }
       recordFailedPayment({ order, paymentId: entity.id, paymentStatus: entity.status || 'failed' });
@@ -315,11 +454,15 @@ export const handleWebhook = async (req, res) => {
         console.warn('Webhook payment.captured for unknown order:', entity.order_id);
         return res.status(200).json({ received: true, ignored: true });
       }
+      // A signature-validated payment.captured event is Razorpay's authoritative
+      // capture confirmation. Enrollments always use server-side order/order_items
+      // amounts from the database, never data from the webhook body or the frontend.
       persistCapturedPayment({
         order,
         paymentId: entity.id,
         amountPaise: Number(entity.amount),
         paymentStatus: entity.status || 'captured',
+        items: getOrderItems(entity.order_id),
       });
       return res.status(200).json({ received: true });
     }

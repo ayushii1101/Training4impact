@@ -16,7 +16,7 @@ export default function CoursesPage() {
           <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl">
             All Fellowship &amp; Certificate Programs
           </h1>
-          <p className="mt-3 max-w-2xl text-slate-600">
+          <p className="mt-3 max-w-2xl text-base text-slate-600">
             Structured programs designed with clinical experts. Choose your specialty and start your
             journey with India's trusted fellowship platform.
           </p>

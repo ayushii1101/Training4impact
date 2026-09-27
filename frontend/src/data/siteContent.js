@@ -50,8 +50,8 @@
   ],
 
   social: {
-    facebook: 'https://www.facebook.com/training4impact',
-    instagram: 'https://www.instagram.com/training4impact',
+    facebook: 'https://www.facebook.com/share/19SWK7nTj2/',
+    instagram: 'https://www.instagram.com/training4impact?stkn=cDVtNHkwcXVqY2Z2',
     linkedin: 'https://www.linkedin.com/company/training-4-impact/home/',
   },
 
@@ -65,20 +65,11 @@
       badge: 'India Recommended',
       methods: ['Razorpay'],
     },
-    {
-      id: 'upi',
-      icon: 'mobile',
-      title: 'UPI',
-      description:
-        'Pay instantly from any UPI-enabled banking app at checkout through Razorpay, using your UPI ID.',
-      badge: 'Instant',
-      methods: ['UPI'],
-    },
   ],
 
-  paymentMethodsHeading: 'Pay Securely with Razorpay & UPI',
+  paymentMethodsHeading: 'Pay Securely with Razorpay',
   paymentMethodsSubtitle:
-    'Every payment is encrypted and processed on Razorpay. UPI and card payments accepted.',
+    'Every payment is encrypted and processed on Razorpay Checkout. Cards, UPI, net banking and more are supported by Razorpay.',
 
   paymentNote:
     'All payments are 256-bit SSL encrypted \u00b7 Refund policy applies',
